@@ -24,7 +24,6 @@ public class MainActivity extends AppCompatActivity {
 //        final EditText rollTotal = findViewById(R.id.rollTotal);
 //        int randomRange = 2;
 //        rollTotal.setText(randomRange);
-////        Integer rollQuantity = rollTotal.getText();
 //        rollTotal.addTextChangedListener(new TextWatcher() {
 //            @Override
 //            public void beforeTextChanged(CharSequence charSequence, int i, int i1, int i2) {
