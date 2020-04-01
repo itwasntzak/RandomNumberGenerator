@@ -3,10 +3,7 @@ package com.example.randomnumbergenerator;
 import androidx.appcompat.app.AppCompatActivity;
 
 import android.os.Bundle;
-import android.text.Editable;
-import android.text.TextWatcher;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.TextView;
 
@@ -21,7 +18,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
 //    public void rangeOfRandom() {
-//        final EditText rollTotal = findViewById(R.id.rollTotal);
+//        EditText rangeInput = findViewById(R.id.rollRangeInput);
 //        int randomRange = 2;
 //        rollTotal.setText(randomRange);
 //        rollTotal.addTextChangedListener(new TextWatcher() {
@@ -32,8 +29,8 @@ public class MainActivity extends AppCompatActivity {
 //
 //            @Override
 //            public void onTextChanged(CharSequence charSequence, int i, int i1, int i2) {
-//                String text = rollTotal.getText().toString();
-//                return Integer.parseInt(text);
+//                String text = rangeInput.getText().toString();
+//                randomRange = Integer.parseInt(text);
 //            }
 //
 //            @Override
@@ -46,8 +43,8 @@ public class MainActivity extends AppCompatActivity {
 
     public void rollRandom(View view) {
 //      todo: figure out how to get an integer from a number EditText, then use a parameter for random range
-        EditText rollTotal = findViewById(R.id.rollTotal);
-        Integer rollRange =  Integer.parseInt(rollTotal.getText().toString());
+        EditText rangeInput = findViewById(R.id.rollRangeInput);
+        Integer rollRange =  Integer.parseInt(rangeInput.getText().toString());
         Integer randomNumb = new Random().nextInt(rollRange) + 1;
         TextView textView = findViewById(R.id.textView);
         textView.setText(randomNumb.toString());
