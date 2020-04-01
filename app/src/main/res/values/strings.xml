@@ -1,0 +1,5 @@
+<resources>
+    <string name="app_name">Random Number Generator</string>
+    <string name="roll_random_number">random\nnumber</string>
+    <string name="default_random_range">2</string>
+</resources>
