@@ -2,32 +2,135 @@ package com.example.randomnumbergenerator;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import java.io.InterruptedIOException;
+import java.io.BufferedWriter;
+import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Date;
 import java.util.Random;
+import java.util.Scanner;
 
 public class MainActivity extends AppCompatActivity {
-//  todo: add buttons below and above random range EditText, incrament value +/- 1 each press
+//  todo: add buttons below and above random range EditText, increment value +/- 1 each press
+//  todo: learn how to write and read file data, write teh results of rollRange & randomNumb. read them in and display on a new activity as a history
+
+    private static final String HISTORY_FILE = "history.txt";
+    public static final String HISTORY_ARRAY = "com.example.randomnumbergenerator.HISTORY";
+    Integer randomResults;
+    TextView resultsTextView;
+    EditText rangeInput;
+    Integer rangeOfRandom;
+    static File historyFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+
+        resultsTextView = findViewById(R.id.randomResults);
+        rangeInput = findViewById(R.id.rollRangeInput);
+        historyFile  = new File(this.getFilesDir(), HISTORY_FILE);
     }
 
     public void rollRandom(View view) {
-        Integer randomNumb = new Random().nextInt(randomRange()) + 1;
-        TextView textView = (TextView) findViewById(R.id.randomResults);
-        textView.setText(randomNumb.toString());
+    //  todo: add a binary setting for randomly generating between 0 & 1
+        rangeOfRandom = rangeOfRandom();
+        randomResults = new Random().nextInt(rangeOfRandom) + 1;
+        saveHistory(rangeOfRandom, randomResults);
+        resultsTextView.setText(randomResults.toString());
     }
 
-    public int randomRange() {
-        EditText rangeInput = (EditText) findViewById(R.id.rollRangeInput);
-        Integer rollRange =  Integer.parseInt(rangeInput.getText().toString());
-        return rollRange;
+    public int rangeOfRandom() {
+    //  todo: see if its possible to set a minimum value for range input
+        return Integer.parseInt(rangeInput.getText().toString());
+    }
+
+    public void saveHistory(int rangeOfRandom, int randomResults) {
+        Calendar dateTime = Calendar.getInstance();
+        String pyTimeFormat = String.format("%d-%02d-%02d %02d:%02d:%02d.%03d",
+                dateTime.get(Calendar.YEAR), dateTime.get(Calendar.MONTH) + 1, dateTime.get(Calendar.DAY_OF_MONTH),
+                dateTime.get(Calendar.HOUR_OF_DAY), dateTime.get(Calendar.MINUTE),
+                dateTime.get(Calendar.SECOND),dateTime.get(Calendar.MILLISECOND));
+        String text = String.format("%s,%s,%s\n", pyTimeFormat, rangeOfRandom, randomResults);
+        try {
+            FileWriter historyWriter;
+            if (historyFile.exists()) {
+                historyWriter = new FileWriter(historyFile, true);
+                BufferedWriter writer = new BufferedWriter(historyWriter);
+                writer.write(text);
+                writer.close();
+            } else {
+                historyWriter = new FileWriter(historyFile);
+                historyWriter.write(text);
+            }
+            historyWriter.close();
+        } catch (FileNotFoundException e) {
+            e.printStackTrace();
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+    }
+
+    public static ArrayList<Object[]> loadHistory() {
+    //  todo: once saving date & time update this function to read all data
+        try {
+            ArrayList<String> newLineList = new ArrayList<>();
+            Scanner readFile = new Scanner(historyFile);
+            while (readFile.hasNextLine()) {
+                newLineList.add(readFile.nextLine());
+            }
+            readFile.close();
+            ArrayList<Object[]> historyList = new ArrayList<>();
+            SimpleDateFormat pyTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+            for (String newLine : newLineList) {
+                String[] tempList = newLine.split(",");
+                Object[] nestedList = {};
+                Date date = pyTimeFormat.parse(tempList[0]);
+                Calendar dateTime = Calendar.getInstance();
+                dateTime.setTime(date);
+                nestedList[0] = dateTime.getTime();
+                int rangeOfRandom = Integer.parseInt(tempList[1]);
+                nestedList[1] = rangeOfRandom;
+                int randomResults = Integer.parseInt(tempList[2]);
+                nestedList[2] = randomResults;
+                historyList.add(nestedList);
+            }
+            return historyList;
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    public void clearHistory(View view) {
+        if (historyFile.exists()) {
+            historyFile.delete();
+        } else {
+            Toast.makeText(
+                    this, "No history to clear.",
+                    Toast.LENGTH_SHORT).show();
+        }
+    }
+
+    public void viewHistory(View view) {
+        if (historyFile.exists()) {
+            Intent intent = new Intent(this, DisplayHistory.class);
+            startActivity(intent);
+        } else {
+            Toast.makeText(
+                    this, "No history currently recorded.",
+                    Toast.LENGTH_SHORT).show();
+        }
     }
 }
