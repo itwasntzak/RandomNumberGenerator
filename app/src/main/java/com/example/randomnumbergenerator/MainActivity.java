@@ -18,6 +18,7 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
+import java.util.List;
 import java.util.Random;
 import java.util.Scanner;
 
@@ -27,11 +28,12 @@ public class MainActivity extends AppCompatActivity {
 
     private static final String HISTORY_FILE = "history.txt";
     public static final String HISTORY_ARRAY = "com.example.randomnumbergenerator.HISTORY";
-    Integer randomResults;
+    public static SimpleDateFormat pyTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
+    static File historyFile;
     TextView resultsTextView;
     EditText rangeInput;
+    Integer randomResults;
     Integer rangeOfRandom;
-    static File historyFile;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -57,12 +59,12 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void saveHistory(int rangeOfRandom, int randomResults) {
-        Calendar dateTime = Calendar.getInstance();
-        String pyTimeFormat = String.format("%d-%02d-%02d %02d:%02d:%02d.%03d",
-                dateTime.get(Calendar.YEAR), dateTime.get(Calendar.MONTH) + 1, dateTime.get(Calendar.DAY_OF_MONTH),
-                dateTime.get(Calendar.HOUR_OF_DAY), dateTime.get(Calendar.MINUTE),
-                dateTime.get(Calendar.SECOND),dateTime.get(Calendar.MILLISECOND));
-        String text = String.format("%s,%s,%s\n", pyTimeFormat, rangeOfRandom, randomResults);
+        Date dateTime = new Date();
+//        String pyTimeFormat = String.format("%d-%02d-%02d %02d:%02d:%02d.%03d",
+//                dateTime.get(Calendar.YEAR), dateTime.get(Calendar.MONTH) + 1, dateTime.get(Calendar.DAY_OF_MONTH),
+//                dateTime.get(Calendar.HOUR_OF_DAY), dateTime.get(Calendar.MINUTE),
+//                dateTime.get(Calendar.SECOND),dateTime.get(Calendar.MILLISECOND));
+        String text = String.format("%s,%s,%s\n", pyTimeFormat.format(dateTime), rangeOfRandom, randomResults);
         try {
             FileWriter historyWriter;
             if (historyFile.exists()) {
@@ -82,29 +84,25 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public static ArrayList<Object[]> loadHistory() {
-    //  todo: once saving date & time update this function to read all data
+    public static ArrayList<ArrayList<Object>> loadHistory() {
         try {
-            ArrayList<String> newLineList = new ArrayList<>();
+            List<String> newLineList = new ArrayList<>();
             Scanner readFile = new Scanner(historyFile);
             while (readFile.hasNextLine()) {
                 newLineList.add(readFile.nextLine());
             }
             readFile.close();
-            ArrayList<Object[]> historyList = new ArrayList<>();
-            SimpleDateFormat pyTimeFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss.SSS");
-            for (String newLine : newLineList) {
-                String[] tempList = newLine.split(",");
-                Object[] nestedList = {};
-                Date date = pyTimeFormat.parse(tempList[0]);
-                Calendar dateTime = Calendar.getInstance();
-                dateTime.setTime(date);
-                nestedList[0] = dateTime.getTime();
+            ArrayList<ArrayList<Object>> historyList = new ArrayList<>();
+            for (String line : newLineList) {
+                String[] tempList = line.split(",");
+                Date dateTime = pyTimeFormat.parse(tempList[0]);
                 int rangeOfRandom = Integer.parseInt(tempList[1]);
-                nestedList[1] = rangeOfRandom;
-                int randomResults = Integer.parseInt(tempList[2]);
-                nestedList[2] = randomResults;
-                historyList.add(nestedList);
+                int randomResult = Integer.parseInt(tempList[2]);
+                ArrayList<Object> history = new ArrayList<>();
+                history.add(dateTime);
+                history.add(rangeOfRandom);
+                history.add(randomResult);
+                historyList.add(history);
             }
             return historyList;
         } catch (Exception e) {
